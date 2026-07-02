@@ -41,7 +41,7 @@ export async function listSites() {
   return authFetch(`${API_BASE}/sites/`);
 }
 
-export async function createSite(url, wpApiUrl, wpAppPassword) {
+export async function addSite(url, wpApiUrl, wpAppPassword) {
   return authFetch(`${API_BASE}/sites/`, {
     method: 'POST',
     body: JSON.stringify({ url, wp_api_url: wpApiUrl, wp_app_password: wpAppPassword }),
