@@ -109,12 +109,8 @@ def trigger_analysis(site_id: int, db: Session = Depends(get_db), current_user: 
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
     
-    # For now, we'll trigger analysis directly (later we'll use Celery)
-    # This calls a helper function we'll create in services
-    from app.services.crawler import crawl_site
-    from app.services.nlp_analyzer import analyze_opportunities
-    
     # Crawl posts
+    from app.services.crawler import crawl_site
     posts_data = crawl_site(site.url)
     
     # Save posts to database
@@ -135,6 +131,7 @@ def trigger_analysis(site_id: int, db: Session = Depends(get_db), current_user: 
     posts = db.query(Post).filter(Post.site_id == site.id).all()
     
     # Analyze for linking opportunities
+    from app.services.nlp_analyzer import analyze_opportunities
     opportunities = analyze_opportunities(posts)
     
     # Save opportunities
