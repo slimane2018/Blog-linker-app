@@ -1,58 +1,78 @@
-import axios from 'axios';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
-// Change this to your backend URL when deployed
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// Helper to get the auth token
+function getToken() {
+  return localStorage.getItem('token');
+}
 
-// Create an axios instance with default settings
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
+// Helper to make authenticated requests
+async function authFetch(url, options = {}) {
+  const token = getToken();
+  const headers = {
     'Content-Type': 'application/json',
-  },
-});
-
-// Add a token to every request if the user is logged in
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
+  };
+  const response = await fetch(url, { ...options, headers });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Network error' }));
+    throw new Error(error.detail || 'Request failed');
   }
-  return config;
-});
+  return response.json();
+}
 
-// ---- Auth ----
+// ─── Auth ─────────────────────────────────────────────
+export async function signup(email, password) {
+  return authFetch(`${API_BASE}/auth/signup`, {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
 
-export const signup = (email, password) =>
-  api.post('/auth/signup', { email, password });
+export async function login(email, password) {
+  return authFetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
 
-export const login = (email, password) =>
-  api.post('/auth/login', { email, password });
+// ─── Sites ─────────────────────────────────────────────
+export async function listSites() {
+  return authFetch(`${API_BASE}/sites/`);
+}
 
-// ---- Sites ----
+export async function createSite(url, wpApiUrl, wpAppPassword) {
+  return authFetch(`${API_BASE}/sites/`, {
+    method: 'POST',
+    body: JSON.stringify({ url, wp_api_url: wpApiUrl, wp_app_password: wpAppPassword }),
+  });
+}
 
-export const getSites = () =>
-  api.get('/sites');
+export async function deleteSite(siteId) {
+  return authFetch(`${API_BASE}/sites/${siteId}`, {
+    method: 'DELETE',
+  });
+}
 
-export const addSite = (url, wpAppPassword) =>
-  api.post('/sites', { url, wp_app_password: wpAppPassword });
+export async function analyzeSite(siteId) {
+  return authFetch(`${API_BASE}/sites/${siteId}/analyze`, {
+    method: 'POST',
+  });
+}
 
-export const deleteSite = (siteId) =>
-  api.delete(`/sites/${siteId}`);
+// ─── Opportunities ─────────────────────────────────────
+export async function getOpportunities(siteId) {
+  return authFetch(`${API_BASE}/opportunities?site_id=${siteId}`);
+}
 
-export const analyzeSite = (siteId) =>
-  api.post(`/sites/${siteId}/analyze`);
+export async function applyOpportunity(opportunityId) {
+  return authFetch(`${API_BASE}/opportunities/${opportunityId}/apply`, {
+    method: 'POST',
+  });
+}
 
-// ---- Opportunities ----
-
-export const getOpportunities = (siteId, status) => {
-  const params = {};
-  if (siteId) params.site_id = siteId;
-  if (status) params.status = status;
-  return api.get('/opportunities', { params });
-};
-
-export const applyOpportunity = (opportunityId) =>
-  api.post(`/opportunities/${opportunityId}/apply`);
-
-export const skipOpportunity = (opportunityId) =>
-  api.post(`/opportunities/${opportunityId}/skip`);
+export async function skipOpportunity(opportunityId) {
+  return authFetch(`${API_BASE}/opportunities/${opportunityId}/skip`, {
+    method: 'POST',
+  });
+}
