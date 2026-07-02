@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: linker
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: bloglinker
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgresql://linker:secret@db/bloglinker
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: your-secret-key
+
+  worker:
+    build: ./backend
+    command: celery -A app.tasks worker --loglevel=info
+    depends_on:
+      - backend
+      - redis
+    environment:
+      DATABASE_URL: postgresql://linker:secret@db/bloglinker
+      REDIS_URL: redis://redis:6379/0
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
