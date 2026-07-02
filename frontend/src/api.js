@@ -36,10 +36,36 @@ export async function login(email, password) {
   });
 }
 
+export async function listSites() {
+  const response = await fetch(`${API_BASE}/sites/`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  if (!response.ok) {
+    throw new Error('Failed to list sites');
+  }
+  return response.json();
+}
+
 // ─── Sites ─────────────────────────────────────────────
 export async function listSites() {
   return authFetch(`${API_BASE}/sites/`);
 }
+
+export async function deleteSite(siteId) {
+  const response = await fetch(`${API_BASE}/sites/${siteId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete site');
+  }
+  return response.json();
+}
+
 
 export async function addSite(url, wpApiUrl, wpAppPassword) {
   return authFetch(`${API_BASE}/sites/`, {
