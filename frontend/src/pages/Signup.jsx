@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+// Hooking directly into your project's central api layer
+import { signup } from '../api'; 
 
 function Signup() {
   const [username, setUsername] = useState('');
@@ -10,23 +11,16 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Fetches backend endpoint from your Netlify build configuration variables
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      // Adjust this endpoint URL path according to your backend setup (e.g., /api/auth/register)
-      await axios.post(`${API_URL}/api/register`, {
-        username,
-        email,
-        password,
-      });
+      // Utilizing your pre-configured signup method
+      await signup({ username, email, password });
       
-      // Registration successful! Send user straight to the login screen
+      // Successfully registered! Send them to log in
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
