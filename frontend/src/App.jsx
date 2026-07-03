@@ -6,48 +6,52 @@ import Dashboard from './pages/Dashboard';
 import AddSite from './pages/AddSite';
 import Navbar from './components/Navbar';
 
-// Create a client for React Query (handles API calls)
 const queryClient = new QueryClient();
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  // Fallback to empty string protects your components from crash-on-null errors
+  const [token, setToken] = useState(localStorage.getItem('token') || "");
 
-  // Function to save token when user logs in
   const handleLogin = (newToken) => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
   };
 
-  // Function to log out
   const handleLogout = () => {
     localStorage.removeItem('token');
-    setToken(null);
+    setToken("");
   };
 
   return (
     <QueryClientProvider client={queryClient}>
+      {/* 
+        Placing BrowserRouter here guarantees that the internal Router context 
+        is accessible to all nested Route elements, resolving the history.ts crash.
+      */}
       <BrowserRouter>
-        {/* Only show navbar if user is logged in */}
         {token && <Navbar onLogout={handleLogout} />}
         
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
           <Routes>
-            {/* If not logged in, show login page */}
             <Route 
               path="/login" 
-              element={token ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} 
+              element={token ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />} 
             />
             
-            {/* If logged in, show dashboard */}
             <Route 
               path="/" 
-              element={token ? <Dashboard /> : <Navigate to="/login" />} 
+              element={token ? <Dashboard /> : <Navigate to="/login" replace />} 
             />
             
-            {/* Add site page */}
             <Route 
               path="/add-site" 
-              element={token ? <AddSite /> : <Navigate to="/login" />} 
+              element={token ? <AddSite /> : <Navigate to="/login" replace />} 
+            />
+
+            {/* Catch-all fallback wildcard prevents unhandled blank routes */}
+            <Route 
+              path="*" 
+              element={<Navigate to={token ? "/" : "/login"} replace />} 
             />
           </Routes>
         </div>
