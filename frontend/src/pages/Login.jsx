@@ -78,6 +78,12 @@ function Login() {
         >
           {loading ? 'Please wait...' : isSignup ? 'Sign Up' : 'Login'}
         </button>
+
+        import { Link } from 'react-router-dom';
+
+        // Change any broken button or <a> tag to this:
+          <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
+
       </form>
       
       <p style={{ textAlign: 'center', marginTop: '15px' }}>
