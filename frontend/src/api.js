@@ -36,17 +36,6 @@ export async function login(email, password) {
   });
 }
 
-export async function listSites() {
-  const response = await fetch(`${API_BASE}/sites/`, {
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
-    }
-  });
-  if (!response.ok) {
-    throw new Error('Failed to list sites');
-  }
-  return response.json();
-}
 
 // ─── Sites ─────────────────────────────────────────────
 export async function listSites() {
