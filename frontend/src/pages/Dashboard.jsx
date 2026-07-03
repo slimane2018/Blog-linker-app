@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listSites, deleteSite, analyzeSite, listOpportunities, applyOpportunity, skipOpportunity } from '../api';
+import { listSites, deleteSite, analyzeSite, getOpportunities, applyOpportunity, skipOpportunity } from '../api';
 
 function Dashboard() {
   const [sites, setSites] = useState([]);
@@ -61,17 +61,17 @@ function Dashboard() {
     await loadOpportunities(siteId);
   };
 
-  const loadOpportunities = async (siteId) => {
-    setLoading(true);
-    try {
-      const response = await listOpportunities(siteId);
-      setOpportunities(response.data);
-    } catch (err) {
-      console.error('Failed to load opportunities', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+const loadOpportunities = async (siteId) => {
+  setLoading(true);
+  try {
+    const opportunities = await getOpportunities(siteId);
+    setOpportunities(opportunities);
+  } catch (err) {
+    console.error('Failed to load opportunities', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleApply = async (opportunityId) => {
     try {

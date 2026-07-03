@@ -16,7 +16,7 @@ function AddSite() {
 
     try {
       await addSite(url, wpAppPassword);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       const message = err.response?.data?.detail || 'Failed to add site. Please check the URL and app password.';
       setError(message);
