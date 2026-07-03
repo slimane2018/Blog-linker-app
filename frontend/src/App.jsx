@@ -1,5 +1,3 @@
-// Add this import statement with your other page imports
-import Signup from './pages/Signup';
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
