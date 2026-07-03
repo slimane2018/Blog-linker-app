@@ -79,22 +79,15 @@ function Login() {
           {loading ? 'Please wait...' : isSignup ? 'Sign Up' : 'Login'}
         </button>
 
-        import { Link } from 'react-router-dom';
+        {/* ... your password inputs and Login button should be right here ... */}
+        <button type="submit">Log In</button>
 
-        // Change any broken button or <a> tag to this:
-          <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
+        {/* This cleanly handles the navigation path without leaving open HTML tags */}
+        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px' }}>
+          Don't have an account? <Link to="/signup" style={{ color: '#0070f3', textDecoration: 'none' }}>Sign Up</Link>
+        </p>
 
       </form>
-      
-      <p style={{ textAlign: 'center', marginTop: '15px' }}>
-        {isSignup ? 'Already have an account?' : "Don't have an account?"}
-        <button
-          onClick={() => setIsSignup(!isSignup)}
-          style={{ marginLeft: '5px', background: 'none', border: 'none', color: 'blue', cursor: 'pointer', textDecoration: 'underline' }}
-        >
-          {isSignup ? 'Login' : 'Sign Up'}
-        </button>
-      </p>
     </div>
   );
 }
