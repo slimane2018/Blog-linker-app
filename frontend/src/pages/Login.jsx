@@ -80,7 +80,10 @@ function Login() {
         </button>
 
         {/* ... your password inputs and Login button should be right here ... */}
-        <button type="submit">Log In</button>
+         {/* This is the only button you need. Delete the plain <button> if it's duplicated below */}
+        <button type="submit" className="login-btn">
+          Log In
+        </button>
 
         {/* This cleanly handles the navigation path without leaving open HTML tags */}
         <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px' }}>
