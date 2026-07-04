@@ -392,3 +392,28 @@ function Dashboard() {
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <button 
                           onClick={() => handleApply(opp.id)}
+
+style={{ padding: '8px 16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+
+>Create Link
+
+<buttononClick={() => handleSkip(opp.id)}
+
+style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+
+Skip
+
+)}
+{opp.status === 'created' && <span style={{ color: '#2b573a', fontWeight: 'bold' }}>Link ✅ Created}
+{opp.status === 'skipped' && <span style={{ color: '#721c24', fontWeight: 'bold' }}>⏭ Skipped}
+
+))}
+
+)}
+
+)}
+
+);
+}
+
+export default Dashboard;
