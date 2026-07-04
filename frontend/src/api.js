@@ -1,11 +1,9 @@
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
-// Helper to get the auth token
 function getToken() {
   return localStorage.getItem('token');
 }
 
-// Helper to make authenticated requests
 async function authFetch(url, options = {}) {
   const token = getToken();
   const headers = {
@@ -13,19 +11,24 @@ async function authFetch(url, options = {}) {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
+
   const response = await fetch(url, { ...options, headers });
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'Network error' }));
-    throw new Error(error.detail || 'Request failed');
+    const errorData = await response.json().catch(() => ({ detail: 'Network error' }));
+    const err = new Error(errorData.detail || errorData.message || 'Request failed');
+    err.response = { data: errorData };
+    throw err;
   }
+
   return response.json();
 }
 
 // ─── Auth ─────────────────────────────────────────────
-export async function signup(email, password) {
+export async function signup(username, email, password) {
   return authFetch(`${API_BASE}/auth/signup`, {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, email, password }),
   });
 }
 
