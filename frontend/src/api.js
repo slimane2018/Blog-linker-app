@@ -16,7 +16,7 @@ async function authFetch(url, options = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ detail: 'Network error' }));
-    const err = new Error(errorData.detail || errorData.message || 'Request failed');
+    const err = new Error(errorData.detail || 'Request failed');
     err.response = { data: errorData };
     throw err;
   }
