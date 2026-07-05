@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Opportunity, Site, Post, User
 from pydantic import BaseModel
 from typing import List, Optional
-import os
 
 router = APIRouter()
 
@@ -14,11 +13,9 @@ class MockUser:
     email = "test@test.com"
 
 def get_current_user():
-    # Always return mock user - NO AUTHENTICATION
     return MockUser()
 # ---------------------------------------
 
-# ---- Pydantic schemas ----
 class OpportunityResponse(BaseModel):
     id: int
     source_title: Optional[str] = None
@@ -38,7 +35,6 @@ class ApplyLinkResponse(BaseModel):
     message: str
     success: bool
 
-# ---- Routes ----
 @router.get("/", response_model=List[OpportunityResponse])
 def list_opportunities(
     site_id: Optional[int] = None,
@@ -54,7 +50,6 @@ def list_opportunities(
         
     opportunities = query.order_by(Opportunity.similarity_score.desc()).all()
 
-    # Enrich with post titles
     result = []
     for opp in opportunities:
         source_post = db.query(Post).filter(Post.id == opp.source_post_id).first()
@@ -79,7 +74,6 @@ def apply_opportunity(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Find the opportunity
     opportunity = db.query(Opportunity).join(Site).filter(
         Opportunity.id == opportunity_id,
         Site.user_id == current_user.id
@@ -89,9 +83,8 @@ def apply_opportunity(
         raise HTTPException(status_code=404, detail="Opportunity not found")
         
     if opportunity.status == "created":
-        return {"message": "Link already created for this opportunity", "success": True}
+        return {"message": "Link already created", "success": True}
 
-    # Get the site and source/target posts
     site = db.query(Site).filter(Site.id == opportunity.site_id).first()
     source_post = db.query(Post).filter(Post.id == opportunity.source_post_id).first()
     target_post = db.query(Post).filter(Post.id == opportunity.target_post_id).first()
@@ -101,10 +94,8 @@ def apply_opportunity(
 
     from app.services.wordpress import get_post_id_by_url, insert_link_into_post
     
-    # Use "admin" for testing since we bypassed real user auth
     wp_username = "admin"
 
-    # Get the WordPress post ID
     wp_post_id = get_post_id_by_url(
         site.wp_api_url,
         source_post.url,
@@ -113,12 +104,8 @@ def apply_opportunity(
     )
 
     if not wp_post_id:
-        raise HTTPException(
-            status_code=400, 
-            detail="Could not find the WordPress post ID. Make sure the post exists."
-        )
+        raise HTTPException(status_code=400, detail="Could not find WordPress post ID")
 
-    # Insert the link
     success = insert_link_into_post(
         site.wp_api_url,
         site.wp_app_password,
@@ -130,12 +117,11 @@ def apply_opportunity(
     )
 
     if success:
-        # Update the opportunity status
         opportunity.status = "created"
         db.commit()
-        return {"message": f"Link created successfully from '{source_post.title}' to '{target_post.title}'", "success": True}
+        return {"message": f"Link created successfully", "success": True}
     else:
-        raise HTTPException(status_code=500, detail="Failed to insert link into WordPress post")
+        raise HTTPException(status_code=500, detail="Failed to insert link")
 
 @router.post("/{opportunity_id}/skip")
 def skip_opportunity(

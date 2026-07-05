@@ -23,7 +23,7 @@ def get_current_user():
 class SiteCreate(BaseModel):
     url: str
     wp_app_password: str
-    wp_username: Optional[str] = "admin" # Default to "admin" for testing
+    wp_username: Optional[str] = "admin"
 
 class SiteResponse(BaseModel):
     id: int
@@ -36,37 +36,31 @@ class SiteResponse(BaseModel):
 # ---- Routes ----
 @router.post("/", response_model=SiteResponse)
 def add_site(site_data: SiteCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Clean the URL (remove trailing slash)
     site_url = site_data.url.rstrip("/")
-
-    # Try to detect WordPress API
     wp_api_url = site_url + "/wp-json/"
+    
     try:
         resp = requests.get(wp_api_url, timeout=10)
         if resp.status_code != 200:
-            raise HTTPException(status_code=400, detail="Could not find WordPress REST API at this URL. Make sure it's a WordPress site.")
+            raise HTTPException(status_code=400, detail="Could not find WordPress REST API")
     except requests.exceptions.RequestException:
-        raise HTTPException(status_code=400, detail="Could not connect to the site. Check the URL.")
+        raise HTTPException(status_code=400, detail="Could not connect to the site")
 
-    # Check if site already exists for this user
     existing = db.query(Site).filter(Site.url == site_url, Site.user_id == current_user.id).first()
     if existing:
-        raise HTTPException(status_code=400, detail="This site is already added to your account")
+        raise HTTPException(status_code=400, detail="This site is already added")
 
-    # Validate app password by making a test request
     test_url = wp_api_url + "wp/v2/users/me"
     try:
-        # Use provided wp_username or default to "admin"
         wp_user = site_data.wp_username if site_data.wp_username else "admin"
         test_resp = requests.get(test_url, auth=(wp_user, site_data.wp_app_password), timeout=10)
         if test_resp.status_code != 200:
-            raise HTTPException(status_code=400, detail="Invalid WordPress app password or username")
+            raise HTTPException(status_code=400, detail="Invalid WordPress app password")
     except HTTPException:
         raise
     except Exception:
         raise HTTPException(status_code=400, detail="Could not authenticate with WordPress")
 
-    # Save the site
     new_site = Site(
         user_id=current_user.id,
         url=site_url,
@@ -89,7 +83,6 @@ def delete_site(site_id: int, db: Session = Depends(get_db), current_user: User 
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
 
-    # Also delete related posts and opportunities
     db.query(Post).filter(Post.site_id == site_id).delete()
     db.query(Opportunity).filter(Opportunity.site_id == site_id).delete()
     
@@ -103,11 +96,9 @@ def trigger_analysis(site_id: int, db: Session = Depends(get_db), current_user: 
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
 
-    # Crawl posts
     from app.services.crawler import crawl_site
     posts_data = crawl_site(site.url)
 
-    # Save posts to database
     for post_data in posts_data:
         existing_post = db.query(Post).filter(Post.url == post_data["url"]).first()
         if not existing_post:
@@ -121,14 +112,11 @@ def trigger_analysis(site_id: int, db: Session = Depends(get_db), current_user: 
             db.add(new_post)
     db.commit()
 
-    # Get all posts for this site
     posts = db.query(Post).filter(Post.site_id == site.id).all()
 
-    # Analyze for linking opportunities
     from app.services.nlp_analyzer import analyze_opportunities
     opportunities = analyze_opportunities(posts)
 
-    # Save opportunities
     for opp in opportunities:
         new_opp = Opportunity(
             site_id=site.id,
@@ -142,7 +130,6 @@ def trigger_analysis(site_id: int, db: Session = Depends(get_db), current_user: 
         db.add(new_opp)
     db.commit()
 
-    # Update last crawled timestamp
     from datetime import datetime
     site.last_crawled = datetime.utcnow()
     db.commit()

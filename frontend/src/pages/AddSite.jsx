@@ -60,7 +60,7 @@ function AddSite() {
             }}
           />
           <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
-            The full URL of your WordPress site (e.g., https://myblog.com)
+            The full URL of your WordPress site
           </small>
         </div>
 
@@ -82,7 +82,7 @@ function AddSite() {
             }}
           />
           <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
-            Generate this from your WordPress dashboard: Users → Profile → Application Passwords
+            Generate from WordPress: Users → Profile → Application Passwords
           </small>
         </div>
 
@@ -93,7 +93,7 @@ function AddSite() {
             style={{
               flex: 1,
               padding: '12px',
-              backgroundColor: loading ? '#ccc' : '#007bff',
+              backgroundColor: loading ? '#ccc' : '#28a745',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -120,23 +120,6 @@ function AddSite() {
           </button>
         </div>
       </form>
-
-      <div style={{ 
-        marginTop: '30px', 
-        padding: '20px', 
-        backgroundColor: '#e7f3ff',
-        borderRadius: '8px'
-      }}>
-        <h3>How to get your WordPress App Password:</h3>
-        <ol style={{ lineHeight: '1.8' }}>
-          <li>Log in to your WordPress dashboard (wp-admin)</li>
-          <li>Go to <strong>Users → Profile</strong></li>
-          <li>Scroll down to <strong>Application Passwords</strong></li>
-          <li>Type a name (e.g., "Blog Linker") and click <strong>Add New</strong></li>
-          <li>Copy the password that appears (it looks like: xxxx xxxx xxxx xxxx)</li>
-          <li>Paste it in the field above</li>
-        </ol>
-      </div>
     </div>
   );
 }
