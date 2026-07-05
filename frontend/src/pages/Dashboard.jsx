@@ -20,9 +20,10 @@ function Dashboard() {
   const loadSites = async () => {
     try {
       const response = await listSites();
-      setSites(response.data); // Ensure this matches your API response structure
+      setSites(response);
     } catch (err) {
       console.error('Failed to load sites', err);
+      setMessage('Failed to load sites: ' + err.message);
     }
   };
 
@@ -30,14 +31,14 @@ function Dashboard() {
     if (!window.confirm('Are you sure you want to delete this site?')) return;
     try {
       await deleteSite(siteId);
-      // Use functional update to avoid stale state
-      setSites(prevSites => prevSites.filter(s => s.id !== siteId));
+      setSites(sites.filter(s => s.id !== siteId));
       if (selectedSite === siteId) {
         setSelectedSite(null);
         setOpportunities([]);
       }
+      setMessage('Site deleted successfully');
     } catch (err) {
-      setMessage('Failed to delete site');
+      setMessage('Failed to delete site: ' + err.message);
     }
   };
 
@@ -48,10 +49,10 @@ function Dashboard() {
       await analyzeSite(siteId);
       setMessage('Analysis complete!');
       if (selectedSite === siteId) {
-        loadOpportunities(siteId);
+        await loadOpportunities(siteId);
       }
     } catch (err) {
-      setMessage('Analysis failed: ' + (err.response?.data?.detail || 'Unknown error'));
+      setMessage('Analysis failed: ' + err.message);
     } finally {
       setAnalyzing(false);
     }
@@ -66,10 +67,10 @@ function Dashboard() {
     setLoading(true);
     try {
       const response = await getOpportunities(siteId);
-      // Changed to response.data to match loadSites (adjust if your API returns raw data)
-      setOpportunities(response.data || response); 
+      setOpportunities(response);
     } catch (err) {
       console.error('Failed to load opportunities', err);
+      setMessage('Failed to load opportunities: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -78,30 +79,29 @@ function Dashboard() {
   const handleApply = async (opportunityId) => {
     try {
       await applyOpportunity(opportunityId);
-      // Use functional update
-      setOpportunities(prevOpps => prevOpps.map(opp => 
+      setOpportunities(opportunities.map(opp => 
         opp.id === opportunityId ? { ...opp, status: 'created' } : opp
       ));
       setMessage('Link created successfully!');
     } catch (err) {
-      setMessage('Failed to create link: ' + (err.response?.data?.detail || 'Unknown error'));
+      setMessage('Failed to create link: ' + err.message);
     }
   };
 
   const handleSkip = async (opportunityId) => {
     try {
       await skipOpportunity(opportunityId);
-      // Use functional update
-      setOpportunities(prevOpps => prevOpps.map(opp => 
+      setOpportunities(opportunities.map(opp => 
         opp.id === opportunityId ? { ...opp, status: 'skipped' } : opp
       ));
+      setMessage('Opportunity skipped');
     } catch (err) {
-      setMessage('Failed to skip opportunity');
+      setMessage('Failed to skip opportunity: ' + err.message);
     }
   };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', color: '#333', paddingBottom: '50px' }}>
+    <div style={{ fontFamily: 'Arial, sans-serif', color: '#333', paddingBottom: '50px', padding: '20px' }}>
       <h1 style={{ margin: '0 0 25px 0', fontSize: '28px' }}>Dashboard</h1>
       
       {message && (
@@ -110,8 +110,8 @@ function Dashboard() {
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '12px 20px', 
-          backgroundColor: '#e7f3ff', 
-          border: '1px solid #b3d4fc', 
+          backgroundColor: message.includes('failed') || message.includes('Failed') ? '#ffe6e6' : '#e7f3ff', 
+          border: '1px solid ' + (message.includes('failed') || message.includes('Failed') ? '#ffb3b3' : '#b3d4fc'), 
           borderRadius: '6px', 
           marginBottom: '25px',
           fontSize: '15px'
@@ -261,7 +261,6 @@ function Dashboard() {
                     </div>
                   )}
 
-                  {/* FIXED BUTTON BLOCK */}
                   <div>
                     {opp.status === 'pending' && (
                       <div style={{ display: 'flex', gap: '10px' }}>
@@ -306,5 +305,4 @@ function Dashboard() {
   );
 }
 
-// ADDED MISSING EXPORT
 export default Dashboard;
