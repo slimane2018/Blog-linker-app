@@ -34,7 +34,7 @@ function App() {
           <Routes>
             <Route 
               path="/login" 
-              element={token ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />} 
+              <Route path="/" element={<Dashboard />} />  // ✅ NEW - Skip login
             />
             
             {/* 2. ADD THIS NEW ROUTE DECLARATION */}

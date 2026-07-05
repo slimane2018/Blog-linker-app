@@ -19,7 +19,8 @@ class MockUser:
     id = 1
     email = "test@test.com"
 
-def get_current_user():
+def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
+    # Always return mock user - NO AUTHENTICATION
     return MockUser()
 
 # ---- Pydantic schemas ----

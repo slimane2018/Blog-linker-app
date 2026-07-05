@@ -1,14 +1,8 @@
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
-function getToken() {
-  return localStorage.getItem('token');
-}
-
 async function authFetch(url, options = {}) {
-  const token = getToken();
   const headers = {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
@@ -24,11 +18,11 @@ async function authFetch(url, options = {}) {
   return response.json();
 }
 
-// Auth - FIXED: Added username parameter
-export async function signup(username, email, password) {
+// Auth - simplified (no username needed)
+export async function signup(email, password) {
   return authFetch(`${API_BASE}/auth/signup`, {
     method: 'POST',
-    body: JSON.stringify({ username, email, password }),
+    body: JSON.stringify({ email, password }),
   });
 }
 
