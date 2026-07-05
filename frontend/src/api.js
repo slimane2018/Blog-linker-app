@@ -5,19 +5,17 @@ function getToken() {
 }
 
 async function authFetch(url, options = {}) {
-  const token = getToken();
   const headers = {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
   const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ detail: 'Network error' }));
-    const err = new Error(errorData.detail || 'Request failed');
-    err.response = { data: errorData };
+    const error = await response.json().catch(() => ({ detail: 'Network error' }));
+    const err = new Error(error.detail || 'Request failed');
+    err.response = { data: error };
     throw err;
   }
 
