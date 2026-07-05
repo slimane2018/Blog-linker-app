@@ -11,80 +11,104 @@ function AddSite() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setLoading(true);
 
     try {
       await addSite(url, wpAppPassword);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
-      const message = err.response?.data?.detail || 'Failed to add site. Please check the URL and app password.';
-      setError(message);
+      setError(err.message || 'Failed to add site');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '500px', margin: '50px auto', padding: '20px' }}>
+    <div style={{ maxWidth: '600px', margin: '50px auto', padding: '30px', fontFamily: 'Arial, sans-serif' }}>
       <h1>Add Your WordPress Site</h1>
       
+      {error && (
+        <div style={{ 
+          padding: '12px', 
+          backgroundColor: '#ffe6e6', 
+          color: '#d8000c', 
+          borderRadius: '4px', 
+          marginBottom: '20px' 
+        }}>
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label><strong>Website URL:</strong></label><br />
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+            Website URL:
+          </label>
           <input
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://yourblog.com"
+            placeholder="https://example.com"
             required
-            style={{ width: '100%', padding: '10px', marginTop: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+            style={{ 
+              width: '100%', 
+              padding: '12px', 
+              border: '1px solid #ddd', 
+              borderRadius: '4px',
+              boxSizing: 'border-box'
+            }}
           />
-          <small style={{ color: '#666' }}>The full URL of your WordPress site (e.g., https://myblog.com)</small>
+          <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+            The full URL of your WordPress site (e.g., https://myblog.com)
+          </small>
         </div>
 
-        <div style={{ marginBottom: '15px' }}>
-          <label><strong>WordPress App Password:</strong></label><br />
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+            WordPress App Password:
+          </label>
           <input
             type="password"
             value={wpAppPassword}
             onChange={(e) => setWpAppPassword(e.target.value)}
-            placeholder="xxxx xxxx xxxx xxxx"
             required
-            style={{ width: '100%', padding: '10px', marginTop: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+            style={{ 
+              width: '100%', 
+              padding: '12px', 
+              border: '1px solid #ddd', 
+              borderRadius: '4px',
+              boxSizing: 'border-box'
+            }}
           />
-          <small style={{ color: '#666' }}>
+          <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
             Generate this from your WordPress dashboard: Users → Profile → Application Passwords
           </small>
         </div>
 
-        {error && (
-          <div style={{ padding: '10px', backgroundColor: '#f8d7da', border: '1px solid #f5c6cb', borderRadius: '4px', color: '#721c24', marginBottom: '15px' }}>
-            {error}
-          </div>
-        )}
-
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             style={{
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
+              flex: 1,
+              padding: '12px',
+              backgroundColor: loading ? '#ccc' : '#007bff',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer',
-              flex: 1
+              cursor: loading ? 'not-allowed' : 'pointer',
+              fontWeight: 'bold'
             }}
           >
-            {loading ? 'Adding site...' : 'Add Site'}
+            {loading ? 'Adding Site...' : 'Add Site'}
           </button>
-          <button 
+          
+          <button
             type="button"
             onClick={() => navigate('/dashboard')}
             style={{
-              padding: '10px 20px',
+              padding: '12px 24px',
               backgroundColor: '#6c757d',
               color: 'white',
               border: 'none',
@@ -97,14 +121,19 @@ function AddSite() {
         </div>
       </form>
 
-      <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#e7f3ff', borderRadius: '8px' }}>
+      <div style={{ 
+        marginTop: '30px', 
+        padding: '20px', 
+        backgroundColor: '#e7f3ff',
+        borderRadius: '8px'
+      }}>
         <h3>How to get your WordPress App Password:</h3>
         <ol style={{ lineHeight: '1.8' }}>
           <li>Log in to your WordPress dashboard (wp-admin)</li>
-          <li>Go to <strong>Users</strong> → <strong>Profile</strong></li>
+          <li>Go to <strong>Users → Profile</strong></li>
           <li>Scroll down to <strong>Application Passwords</strong></li>
           <li>Type a name (e.g., "Blog Linker") and click <strong>Add New</strong></li>
-          <li>Copy the password that appears (it looks like: <code>xxxx xxxx xxxx xxxx</code>)</li>
+          <li>Copy the password that appears (it looks like: xxxx xxxx xxxx xxxx)</li>
           <li>Paste it in the field above</li>
         </ol>
       </div>

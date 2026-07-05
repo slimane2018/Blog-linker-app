@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 async function authFetch(url, options = {}) {
   const headers = {
@@ -18,7 +18,7 @@ async function authFetch(url, options = {}) {
   return response.json();
 }
 
-// Auth - simplified (no username needed)
+// Auth
 export async function signup(email, password) {
   return authFetch(`${API_BASE}/auth/signup`, {
     method: 'POST',
@@ -33,15 +33,15 @@ export async function login(email, password) {
   });
 }
 
-// Sites
+// Sites - FIXED: Removed wpApiUrl parameter (backend auto-detects it)
 export async function listSites() {
   return authFetch(`${API_BASE}/sites/`);
 }
 
-export async function addSite(url, wpApiUrl, wpAppPassword) {
+export async function addSite(url, wpAppPassword) {
   return authFetch(`${API_BASE}/sites/`, {
     method: 'POST',
-    body: JSON.stringify({ url, wp_api_url: wpApiUrl, wp_app_password: wpAppPassword }),
+    body: JSON.stringify({ url, wp_app_password: wpAppPassword }),
   });
 }
 

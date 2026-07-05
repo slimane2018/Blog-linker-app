@@ -8,6 +8,10 @@ import os
 import requests
 from urllib.parse import urlparse
 
+class MockUser:
+    id = 1
+    email = "test@test.com"
+
 router = APIRouter()
 
 SECRET_KEY = os.getenv("JWT_SECRET", "change-this-secret-key-in-production")
@@ -16,12 +20,8 @@ ALGORITHM = "HS256"
 # ---- Helper: get current user from JWT token ----
 
 # Replace the old get_current_user function with this Mock User
-class MockUser:
-    id = 1
-    email = "test@test.com"
 
 def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
-    # Always return mock user - NO AUTHENTICATION
     return MockUser()
 
 # ---- Pydantic schemas ----
@@ -62,7 +62,7 @@ def add_site(site_data: SiteCreate, db: Session = Depends(get_db), current_user:
     # Validate app password by making a test request
     test_url = wp_api_url + "wp/v2/users/me"
     try:
-        test_resp = requests.get(test_url, auth=(current_user.email, site_data.wp_app_password), timeout=10)
+        test_resp = requests.get(test_url, auth=("admin", site_data.wp_app_password), timeout=10)
         if test_resp.status_code != 200:
             raise HTTPException(status_code=400, detail="Invalid WordPress app password or username")
     except:
