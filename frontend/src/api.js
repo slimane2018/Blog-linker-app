@@ -5,8 +5,10 @@ function getToken() {
 }
 
 async function authFetch(url, options = {}) {
+  const token = getToken();
   const headers = {
     'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
@@ -22,7 +24,7 @@ async function authFetch(url, options = {}) {
   return response.json();
 }
 
-// ─── Auth ─────────────────────────────────────────────
+// Auth - FIXED: Added username parameter
 export async function signup(username, email, password) {
   return authFetch(`${API_BASE}/auth/signup`, {
     method: 'POST',
@@ -37,7 +39,7 @@ export async function login(email, password) {
   });
 }
 
-// ─── Sites ─────────────────────────────────────────────
+// Sites
 export async function listSites() {
   return authFetch(`${API_BASE}/sites/`);
 }
@@ -61,7 +63,7 @@ export async function analyzeSite(siteId) {
   });
 }
 
-// ─── Opportunities ─────────────────────────────────────
+// Opportunities
 export async function getOpportunities(siteId) {
   return authFetch(`${API_BASE}/opportunities?site_id=${siteId}`);
 }

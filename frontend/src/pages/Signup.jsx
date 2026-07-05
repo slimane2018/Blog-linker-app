@@ -16,8 +16,8 @@ function Signup() {
     setLoading(true);
 
     try {
-      await signup(username, email, password);
-      navigate('/login');
+      await signup(username, email, password);  // ✅ CORRECT
+		navigate('/login');  // ✅ CORRECT - no spaces
     } catch (err) {
       const msg =
         err.response?.data?.detail ||

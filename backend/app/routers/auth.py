@@ -45,6 +45,18 @@ class UserLogin(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    
+class UserCreate(BaseModel):
+    username: str  # ADD THIS LINE
+    email: str
+    password: str
+
+# In the signup function, add username when creating user:
+new_user = User(
+    username=user_data.username,  # ADD THIS LINE
+    email=user_data.email,
+    hashed_password=hash_password(user_data.password)
+)    
 
 # ---- Routes ----
 
