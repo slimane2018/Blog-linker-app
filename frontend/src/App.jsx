@@ -1,66 +1,32 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import Login from './pages/Login';
+// Make sure these paths match your actual folder structure!
 import Dashboard from './pages/Dashboard';
-import AddSite from './pages/AddSite';
-import Navbar from './components/Navbar';
-
-// 1. ADD THIS IMPORT (Ensure the file path matches your exact Signup component name)
-import Signup from './pages/Signup'; 
-
-const queryClient = new QueryClient();
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+// Import AddSite if you have that page, otherwise delete this line and its Route below
+import AddSite from './pages/AddSite'; 
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token') || "");
-
-  const handleLogin = (newToken) => {
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setToken("");
-  };
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        {token && <Navbar onLogout={handleLogout} />}
+    <Router>
+      <Routes>
+        {/* 1. Skip login and go straight to the Dashboard */}
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         
-        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-          <Routes>
-            <Route 
-              path="/login" 
-              <Route path="/" element={<Dashboard />} />  // ✅ NEW - Skip login
-            />
-            
-            {/* 2. ADD THIS NEW ROUTE DECLARATION */}
-            <Route 
-              path="/signup" 
-              element={token ? <Navigate to="/" replace /> : <Signup />} 
-            />
-            
-            <Route 
-              path="/" 
-              element={token ? <Dashboard /> : <Navigate to="/login" replace />} 
-            />
-            
-            <Route 
-              path="/add-site" 
-              element={token ? <AddSite /> : <Navigate to="/login" replace />} 
-            />
-
-            <Route 
-              path="*" 
-              element={<Navigate to={token ? "/" : "/login"} replace />} 
-            />
-          </Routes>
-        </div>
-      </BrowserRouter>
-    </QueryClientProvider>
+        {/* 2. Other app routes */}
+        <Route path="/add-site" element={<AddSite />} />
+        
+        {/* 3. Keep Login/Signup routes hidden in the background for later */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        
+        {/* 4. Catch-all: If they type a wrong URL, send them to Dashboard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }
 
